@@ -7,6 +7,6 @@
     }
   ],
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/hotel-front-desk-frontend/browser",
+  "outputDirectory": "dist/hotel-management-frontend",
   "framework": "angular"
 }
