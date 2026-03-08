@@ -1,0 +1,428 @@
+.revenue-report-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+// Period Selector Card
+.period-selector-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.button-toggle-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.toggle-button {
+  flex: 1;
+  padding: 12px 24px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #64B5F6;
+    color: #64B5F6;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #64B5F6 0%, #42A5F5 100%);
+    border-color: #64B5F6;
+    color: white;
+    box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+  }
+}
+
+// Date Picker Section
+.date-picker-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.date-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    white-space: nowrap;
+  }
+}
+
+.date-input,
+.date-select {
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #64B5F6;
+    box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
+  }
+}
+
+.date-input {
+  min-width: 160px;
+}
+
+.date-select {
+  min-width: 120px;
+}
+
+.search-button {
+  padding: 10px 32px;
+  background: linear-gradient(135deg, #64B5F6 0%, #42A5F5 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(100, 181, 246, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Error Message
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.1);
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  p {
+    margin-top: 16px;
+    color: #666;
+    font-size: 16px;
+  }
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #64B5F6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Metrics Container
+.metrics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.metric-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.revenue-card .metric-icon {
+  background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(129, 199, 132, 0.3);
+}
+
+.rooms-card .metric-icon {
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 183, 77, 0.3);
+}
+
+.bookings-card .metric-icon {
+  background: linear-gradient(135deg, #64B5F6 0%, #42A5F5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.3);
+}
+
+.metric-content {
+  flex: 1;
+}
+
+.metric-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .revenue-report-container {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .button-toggle-group {
+    flex-direction: column;
+  }
+
+  .date-picker-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-picker-group {
+    flex-direction: column;
+    align-items: stretch;
+
+    label {
+      margin-bottom: 4px;
+    }
+  }
+
+  .date-input,
+  .date-select {
+    width: 100%;
+  }
+
+  .search-button {
+    width: 100%;
+  }
+
+  .metrics-container {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    padding: 20px;
+  }
+
+  .metric-icon {
+    width: 56px;
+    height: 56px;
+
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .metric-value {
+    font-size: 28px;
+  }
+}
+
+// Charts Container
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.chart-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.chart-wrapper {
+  position: relative;
+}
+
+// Bar Chart Styles
+.bar-chart {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 12px;
+
+  .bar {
+    fill: #64B5F6;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      fill: #42A5F5;
+      filter: drop-shadow(0 4px 8px rgba(100, 181, 246, 0.4));
+    }
+  }
+}
+
+// Line Chart Styles
+.line-chart {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 12px;
+
+  .grid-line {
+    stroke: #e0e0e0;
+    stroke-width: 0.5;
+    stroke-dasharray: 2, 2;
+  }
+
+  .line {
+    stroke: #64B5F6;
+    stroke-width: 2;
+    fill: none;
+    transition: all 0.3s ease;
+  }
+
+  .data-point {
+    fill: #64B5F6;
+    stroke: white;
+    stroke-width: 1.5;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      r: 3;
+      fill: #42A5F5;
+      filter: drop-shadow(0 2px 4px rgba(100, 181, 246, 0.4));
+    }
+  }
+}
+
+// Chart Labels
+.chart-labels {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chart-label {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  flex: 1;
+  min-width: 60px;
+}
+
+// Responsive Charts
+@media (max-width: 768px) {
+  .charts-container {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-title {
+    font-size: 16px;
+  }
+
+  .bar-chart,
+  .line-chart {
+    height: 250px;
+  }
+
+  .chart-label {
+    font-size: 11px;
+    min-width: 50px;
+  }
+}

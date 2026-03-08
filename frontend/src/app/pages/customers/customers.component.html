@@ -1,0 +1,240 @@
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">จัดการลูกค้า</h2>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <i class="bi bi-plus-circle me-2"></i>เพิ่มลูกค้าใหม่
+    </button>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error() }}
+      <button type="button" class="btn-close" (click)="error.set(null)"></button>
+    </div>
+  }
+
+  <!-- Loading Spinner -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">กำลังโหลด...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Customers Table -->
+  @if (!loading()) {
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ชื่อ-นามสกุล</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>เลขบัตรประชาชน</th>
+                <th class="text-end">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (customer of customers(); track customer.customerId) {
+                <tr>
+                  <td><strong>{{ customer.name }}</strong></td>
+                  <td>{{ customer.phoneNumber }}</td>
+                  <td>{{ customer.thaiIdCard }}</td>
+                  <td class="text-end">
+                    <button 
+                      class="btn btn-sm btn-outline-primary" 
+                      (click)="openEditModal(customer)"
+                      title="แก้ไข">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">
+                    ไม่มีข้อมูลลูกค้า
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Add Customer Modal -->
+  @if (showAddModal()) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">เพิ่มลูกค้าใหม่</h5>
+            <button type="button" class="btn-close" (click)="closeAddModal()" [disabled]="submitting()"></button>
+          </div>
+          <div class="modal-body">
+            @if (formErrors().length > 0) {
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  @for (error of formErrors(); track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            
+            <form>
+              <div class="mb-3">
+                <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().name"
+                  (ngModelChange)="customerForm.update(f => ({...f, name: $event}))"
+                  name="name"
+                  placeholder="เช่น สมชาย ใจดี"
+                  [disabled]="submitting()">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                <input 
+                  type="tel" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().phoneNumber"
+                  (ngModelChange)="customerForm.update(f => ({...f, phoneNumber: $event}))"
+                  name="phoneNumber"
+                  placeholder="เช่น 0812345678"
+                  maxlength="10"
+                  [disabled]="submitting()">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">เลขบัตรประชาชน <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().thaiIdCard"
+                  (ngModelChange)="customerForm.update(f => ({...f, thaiIdCard: $event}))"
+                  name="thaiIdCard"
+                  placeholder="เช่น 1234567890123"
+                  maxlength="13"
+                  [disabled]="submitting()">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddModal()" [disabled]="submitting()">
+              ยกเลิก
+            </button>
+            <button type="button" class="btn btn-primary" (click)="submitAddCustomer()" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              บันทึก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Customer Modal -->
+  @if (showEditModal()) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">แก้ไขข้อมูลลูกค้า</h5>
+            <button type="button" class="btn-close" (click)="closeEditModal()" [disabled]="submitting()"></button>
+          </div>
+          <div class="modal-body">
+            @if (formErrors().length > 0) {
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  @for (error of formErrors(); track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            
+            <form>
+              <div class="mb-3">
+                <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().name"
+                  (ngModelChange)="customerForm.update(f => ({...f, name: $event}))"
+                  name="name"
+                  placeholder="เช่น สมชาย ใจดี"
+                  [disabled]="submitting()">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                <input 
+                  type="tel" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().phoneNumber"
+                  (ngModelChange)="customerForm.update(f => ({...f, phoneNumber: $event}))"
+                  name="phoneNumber"
+                  placeholder="เช่น 0812345678"
+                  maxlength="10"
+                  [disabled]="submitting()">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">เลขบัตรประชาชน <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="customerForm().thaiIdCard"
+                  (ngModelChange)="customerForm.update(f => ({...f, thaiIdCard: $event}))"
+                  name="thaiIdCard"
+                  placeholder="เช่น 1234567890123"
+                  maxlength="13"
+                  [disabled]="submitting()">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeEditModal()" [disabled]="submitting()">
+              ยกเลิก
+            </button>
+            <button type="button" class="btn btn-primary" (click)="submitEditCustomer()" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              บันทึก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Backdrop -->
+  @if (showAddModal() || showEditModal()) {
+    <div class="modal-backdrop fade show" 
+         (click)="closeAddModal(); closeEditModal()"></div>
+  }
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    @if (showToast()) {
+      <div class="toast show" 
+           [class.bg-success]="toastType() === 'success'" 
+           [class.bg-danger]="toastType() === 'error'">
+        <div class="toast-body text-white">
+          {{ toastMessage() }}
+        </div>
+      </div>
+    }
+  </div>
+</div>

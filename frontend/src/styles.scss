@@ -1,0 +1,286 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* ========================================
+   Hotel Front Desk Management System
+   Custom Bootstrap Theme
+   ======================================== */
+
+/* Custom CSS Variables for Hotel Theme */
+:root {
+  /* Primary Colors - Blue tones */
+  --primary-blue: #64B5F6;
+  --primary-blue-dark: #42A5F5;
+  --primary-blue-light: #90CAF9;
+  
+  /* Status Colors - Soft, friendly tones */
+  --status-available: #81C784;      /* Pastel green */
+  --status-occupied: #E57373;       /* Pastel red-orange */
+  --status-reserved: #FFB74D;       /* Yellow-orange */
+  --status-cleaning: #FFD54F;       /* Pastel yellow */
+  
+  /* Background Colors */
+  --bg-sidebar: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%);
+  --bg-white: #FFFFFF;
+  --bg-light: #F5F5F5;
+  
+  /* Shadow Effects */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.08);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-light);
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* Bootstrap Overrides - Rounded Corners */
+.btn {
+  border-radius: var(--radius-sm) !important;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-blue-dark) !important;
+  border-color: var(--primary-blue-dark) !important;
+  box-shadow: var(--shadow-soft);
+}
+
+.card {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card);
+  border: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.modal-content {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-medium);
+  border: none;
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid #ddd;
+  padding: 10px 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+}
+
+/* Input Groups */
+.input-group {
+  border-radius: var(--radius-sm);
+}
+
+.input-group .form-control:first-child {
+  border-top-left-radius: var(--radius-sm) !important;
+  border-bottom-left-radius: var(--radius-sm) !important;
+}
+
+.input-group .form-control:last-child {
+  border-top-right-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
+}
+
+/* Tables */
+.table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Badges */
+.badge {
+  border-radius: var(--radius-sm) !important;
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-medium);
+  border: none;
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-light);
+}
+
+/* Alerts */
+.alert {
+  border-radius: var(--radius-md) !important;
+  border: none;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Custom Utility Classes */
+.shadow-soft {
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium) !important;
+}
+
+.rounded-soft {
+  border-radius: var(--radius-sm) !important;
+}
+
+.rounded-medium {
+  border-radius: var(--radius-md) !important;
+}
+
+.rounded-large {
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Status Color Classes */
+.status-available {
+  background-color: var(--status-available) !important;
+  color: white !important;
+}
+
+.status-occupied {
+  background-color: var(--status-occupied) !important;
+  color: white !important;
+}
+
+.status-reserved {
+  background-color: var(--status-reserved) !important;
+  color: white !important;
+}
+
+.status-cleaning {
+  background-color: var(--status-cleaning) !important;
+  color: #333 !important;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-blue {
+  background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--primary-blue) 100%);
+}
+
+.bg-gradient-sidebar {
+  background: var(--bg-sidebar);
+}
+
+/* Text Colors */
+.text-primary-blue {
+  color: var(--primary-blue) !important;
+}
+
+/* Smooth Transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-light);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: #333;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1rem; }
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  .btn {
+    padding: 8px 16px;
+  }
+}

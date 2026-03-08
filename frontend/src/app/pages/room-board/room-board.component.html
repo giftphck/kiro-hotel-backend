@@ -1,0 +1,654 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">ห้องพัก</h2>
+        <div class="d-flex gap-2">
+         
+          <!-- Date Picker -->
+          <input 
+            type="date" 
+            class="form-control" 
+            style="width: 180px;"
+            [value]="startDate() | date:'yyyy-MM-dd'"
+            (change)="onDateChange($event)"
+          />
+          <!-- Date Navigation -->
+          <div class="btn-group">
+            <button class="btn btn-outline-primary" (click)="previousWeek()">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-outline-primary" (click)="today()">วันนี้</button>
+            <button class="btn btn-outline-primary" (click)="nextWeek()">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Range Display -->
+      <div class="mb-3">
+        <span class="text-muted">
+          {{ formatDate(dateRange()[0]) }} - {{ formatDate(dateRange()[6]) }}
+        </span>
+      </div>
+
+      <!-- Room Board Grid -->
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0 room-board-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="text-center" style="width: 80px;">ห้อง</th>
+                  @for (date of dateRange(); track date) {
+                    <th class="text-center">
+                      {{ formatDate(date) }}
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading()) {
+                  <tr>
+                    <td [attr.colspan]="dateRange().length + 1" class="text-center py-5">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">กำลังโหลด...</span>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (row of boardData(); track $index; let roomIndex = $index) {
+                    <tr>
+                      <td class="text-center fw-bold align-middle">
+                        {{ filteredRooms()[roomIndex].roomNumber }}
+                      </td>
+                      @for (cell of row; track cell.date) {
+                        <td class="p-1">
+                          <div 
+                            class="cell-content {{ getStatusClass(cell.status) }}"
+                            [class.cursor-pointer]="cell.status === 'AVAILABLE' || cell.status === 'OCCUPIED' || cell.status === 'RESERVED'"
+                            [title]="cell.booking ? cell.booking.customerName : getCellStatusLabel(cell.status)"
+                            (click)="onCellClick(cell)"
+                          >
+                            <small>{{ getCellStatusLabel(cell.status) }}</small>
+                            @if (cell.booking && cell.status === 'OCCUPIED') {
+                              <div class="mt-1">
+                                <i class="bi bi-person-fill"></i>
+                              </div>
+                            }
+                          </div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Table -->
+      <div class="card shadow-sm mt-4">
+        <div class="card-header">
+          <h5 class="mb-0">รายละเอียดการจอง</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>ห้อง</th>
+                  @for (date of dateRange(); track date) {
+                    <th class="text-center">{{ formatDate(date) }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of boardData(); track $index; let roomIndex = $index) {
+                  <tr>
+                    <td class="fw-bold">{{ filteredRooms()[roomIndex].roomNumber }}</td>
+                    @for (cell of row; track cell.date) {
+                      <td class="text-center">
+                        @if (cell.booking) {
+                          <small>{{ cell.booking.customerName }}</small>
+                        } @else {
+                          <small class="text-muted">{{ getCellStatusLabel(cell.status) }}</small>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <!-- Check-out Today -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-danger text-white">
+          <h6 class="mb-0">
+            Check-out วันนี้
+            <small class="d-block mt-1" style="font-size: 0.75rem; font-weight: normal;">
+              <i class="bi bi-clock"></i> เวลา 12:00 น. (เที่ยง)
+            </small>
+          </h6>
+        </div>
+        <div class="card-body">
+          @if (todayCheckOuts().length === 0) {
+            <p class="text-muted mb-0">ไม่มีรายการ</p>
+          } @else {
+            @for (booking of todayCheckOuts(); track booking.bookingId) {
+              <div class="mb-2 pb-2 border-bottom">
+                <div class="d-flex justify-content-between">
+                  <strong>ห้อง {{ booking.roomNumber }}</strong>
+                  <span class="text-muted">
+                    <i class="bi bi-clock"></i> {{ formatTime(booking.checkOutDate) }}
+                  </span>
+                </div>
+                <small class="text-muted">{{ booking.customerName }}</small>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Check-in Today -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            Check-in วันนี้
+            <small class="d-block mt-1" style="font-size: 0.75rem; font-weight: normal;">
+              <i class="bi bi-clock"></i> เวลา 14:00 น. (2 โมงบ่าย)
+            </small>
+          </h6>
+        </div>
+        <div class="card-body">
+          @if (todayCheckIns().length === 0) {
+            <p class="text-muted mb-0">ไม่มีรายการ</p>
+          } @else {
+            @for (booking of todayCheckIns(); track booking.bookingId) {
+              <div class="mb-2 pb-2 border-bottom">
+                <div class="d-flex justify-content-between">
+                  <strong>ห้อง {{ booking.roomNumber }}</strong>
+                  <span class="text-muted">
+                    <i class="bi bi-clock"></i> {{ formatTime(booking.checkInDate) }}
+                  </span>
+                </div>
+                <small class="text-muted">{{ booking.customerName }}</small>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Booking Modal -->
+  @if (showAddModal()) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              จองห้อง {{ selectedCell()?.roomNumber }} - {{ selectedCell() ? formatDate(selectedCell()!.date) : '' }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeAddModal()" [disabled]="submitting()"></button>
+          </div>
+          <div class="modal-body">
+            @if (formErrors().length > 0) {
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  @for (error of formErrors(); track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            
+            <form>
+              <!-- Customer Info -->
+              <h6 class="mb-3">ข้อมูลลูกค้า</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().customer.name"
+                    (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, name: $event}}))"
+                    name="customerName"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">เบอร์โทรศัพท์</label>
+                  <input 
+                    type="tel" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().customer.phoneNumber"
+                    (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, phoneNumber: $event}}))"
+                    name="phoneNumber"
+                    maxlength="10"
+                    placeholder="ไม่บังคับ"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">เลขบัตรประชาชน</label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="bookingForm().customer.thaiIdCard"
+                  (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, thaiIdCard: $event}}))"
+                  name="thaiIdCard"
+                  maxlength="13"
+                  placeholder="ไม่บังคับ"
+                  [disabled]="submitting()">
+              </div>
+
+              <!-- Booking Details -->
+              <h6 class="mb-3">รายละเอียดการจอง</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">ประเภทการจอง <span class="text-danger">*</span></label>
+                  <select 
+                    class="form-select"
+                    [(ngModel)]="bookingForm().bookingType"
+                    (ngModelChange)="bookingForm.update(f => ({...f, bookingType: $event, priceType: $event})); onDateOrPriceChange()"
+                    name="bookingType"
+                    [disabled]="submitting()">
+                    @for (type of bookingTypes; track type) {
+                      <option [value]="type">{{ getBookingTypeLabel(type) }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">จำนวนผู้เข้าพัก <span class="text-danger">*</span></label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().numberOfGuests"
+                    (ngModelChange)="bookingForm.update(f => ({...f, numberOfGuests: +$event}))"
+                    name="numberOfGuests"
+                    min="1"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">วันเช็คอิน <span class="text-danger">*</span></label>
+                  <input 
+                    type="datetime-local" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().checkInDate"
+                    (ngModelChange)="bookingForm.update(f => ({...f, checkInDate: $event})); onDateOrPriceChange()"
+                    name="checkInDate"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">วันเช็คเอาท์ <span class="text-danger">*</span></label>
+                  <input 
+                    type="datetime-local" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().checkOutDate"
+                    (ngModelChange)="bookingForm.update(f => ({...f, checkOutDate: $event})); onDateOrPriceChange()"
+                    name="checkOutDate"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <!-- Pricing -->
+              <h6 class="mb-3">ราคา</h6>
+              <div class="row">
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">ราคาต่อหน่วย <span class="text-danger">*</span></label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().unitPrice"
+                    (ngModelChange)="bookingForm.update(f => ({...f, unitPrice: +$event})); onDateOrPriceChange()"
+                    name="unitPrice"
+                    min="0"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">ราคารวม (คำนวณ)</label>
+                  <input 
+                    type="number" 
+                    class="form-control bg-light"
+                    [value]="bookingForm().calculatedPrice"
+                    readonly>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">ราคาที่เก็บจริง <span class="text-danger">*</span></label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().totalPrice"
+                    (ngModelChange)="bookingForm.update(f => ({...f, totalPrice: +$event}))"
+                    name="actualPrice"
+                    min="0"
+                    [disabled]="submitting()">
+                  <small class="text-muted">สามารถแก้ไขได้</small>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">เงินมัดจำ</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().deposit"
+                    (ngModelChange)="bookingForm.update(f => ({...f, deposit: +$event}))"
+                    name="deposit"
+                    min="0"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">หมายเหตุ</label>
+                <textarea 
+                  class="form-control"
+                  [(ngModel)]="bookingForm().remark"
+                  (ngModelChange)="bookingForm.update(f => ({...f, remark: $event}))"
+                  name="remark"
+                  rows="2"
+                  [disabled]="submitting()"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddModal()" [disabled]="submitting()">
+              ยกเลิก
+            </button>
+            <button type="button" class="btn btn-primary" (click)="submitAddBooking()" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              จองห้อง
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Backdrop -->
+  @if (showAddModal() || showDetailsModal() || showAddPaymentModal() || showRefundModal()) {
+    <div class="modal-backdrop fade show"></div>
+  }
+
+  <!-- Add Payment Modal -->
+  @if (showAddPaymentModal() && selectedBooking(); as booking) {
+    <div class="modal show" style="display: block; z-index: 1060;" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">รับเงินเพิ่ม - ห้อง {{ booking.roomNumber }}</h5>
+            <button type="button" class="btn-close" (click)="closeAddPaymentModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <strong>ยอดคงเหลือ:</strong> {{ booking.totalPrice - booking.deposit }} บาท
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">จำนวนเงินที่รับ <span class="text-danger">*</span></label>
+              <input 
+                type="number" 
+                class="form-control"
+                [(ngModel)]="paymentAmount"
+                (ngModelChange)="paymentAmount.set($event)"
+                min="1"
+                [max]="booking.totalPrice - totalPaidFromHistory()"
+                placeholder="ระบุจำนวนเงิน">
+              <small class="text-muted">สูงสุด {{ booking.totalPrice - totalPaidFromHistory() }} บาท</small>
+            </div>
+            
+            @if (paymentAmount() > 0) {
+              <div class="alert alert-success">
+                <strong>ยอดหลังรับเงิน:</strong> {{ totalPaidFromHistory() + paymentAmount() }} บาท<br>
+                <strong>คงเหลือ:</strong> {{ booking.totalPrice - totalPaidFromHistory() - paymentAmount() }} บาท
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddPaymentModal()">
+              ยกเลิก
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-primary" 
+              (click)="submitAddPayment()"
+              [disabled]="paymentAmount() <= 0 || paymentAmount() > (booking.totalPrice - booking.deposit)">
+              <i class="bi bi-cash me-1"></i>บันทึกการรับเงิน
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Second backdrop for payment modal -->
+    <div class="modal-backdrop fade show" style="z-index: 1059;"></div>
+  }
+
+  <!-- Refund Modal -->
+  @if (showRefundModal() && selectedBooking(); as booking) {
+    <div class="modal show" style="display: block; z-index: 1060;" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title">คืนเงินมัดจำ - ห้อง {{ booking.roomNumber }}</h5>
+            <button type="button" class="btn-close" (click)="closeRefundModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <strong>ยอดที่ชำระแล้ว:</strong> {{ totalPaidFromHistory() }} บาท
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">จำนวนเงินที่คืน <span class="text-danger">*</span></label>
+              <input 
+                type="number" 
+                class="form-control"
+                [(ngModel)]="refundAmount"
+                (ngModelChange)="refundAmount.set($event)"
+                min="1"
+                [max]="totalPaidFromHistory()"
+                placeholder="ระบุจำนวนเงิน">
+              <small class="text-muted">สูงสุด {{ totalPaidFromHistory() }} บาท</small>
+            </div>
+            
+            @if (refundAmount() > 0) {
+              <div class="alert alert-info">
+                <strong>ยอดหลังคืนเงิน:</strong> {{ totalPaidFromHistory() - refundAmount() }} บาท<br>
+                <strong>คงเหลือที่ต้องชำระ:</strong> {{ booking.totalPrice - (totalPaidFromHistory() - refundAmount()) }} บาท
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeRefundModal()">
+              ยกเลิก
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-warning" 
+              (click)="submitRefund()"
+              [disabled]="refundAmount() <= 0 || refundAmount() > totalPaidFromHistory()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>คืนเงิน
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Second backdrop for refund modal -->
+    <div class="modal-backdrop fade show" style="z-index: 1059;"></div>
+  }
+
+  <!-- Booking Details Modal -->
+  @if (showDetailsModal() && selectedBooking(); as booking) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">รายละเอียดการจอง</h5>
+            <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-6"><strong>ห้อง:</strong></div>
+              <div class="col-6">{{ booking.roomNumber }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ลูกค้า:</strong></div>
+              <div class="col-6">{{ booking.customerName }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เบอร์โทร:</strong></div>
+              <div class="col-6">{{ booking.customerPhone }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เช็คอิน:</strong></div>
+              <div class="col-6">{{ formatDateForDisplay(booking.checkInDate) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เช็คเอาท์:</strong></div>
+              <div class="col-6">{{ formatDateForDisplay(booking.checkOutDate) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ประเภท:</strong></div>
+              <div class="col-6">{{ getBookingTypeLabel(booking.bookingType) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>จำนวนผู้เข้าพัก:</strong></div>
+              <div class="col-6">{{ booking.numberOfGuests }} คน</div>
+            </div>
+            
+            <!-- Payment Information -->
+            <hr>
+            <h6 class="mb-3">ข้อมูลการชำระเงิน</h6>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ราคาคำนวณ:</strong></div>
+              <div class="col-6 text-primary fw-bold">{{ booking.totalPrice }} บาท</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ชำระแล้ว:</strong></div>
+              <div class="col-6 text-success">{{ totalPaidFromHistory() }} บาท</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เงินที่ขาด:</strong></div>
+              <div class="col-6 text-danger fw-bold">{{ booking.totalPrice - totalPaidFromHistory() }} บาท</div>
+            </div>
+            
+            <!-- Payment Activity Log -->
+            <div class="mt-3">
+              <strong>ประวัติการชำระเงิน:</strong>
+              <div class="border rounded p-2 mt-2 bg-light" style="max-height: 200px; overflow-y: auto;">
+                @if (displayedPayments().length === 0) {
+                  <small class="text-muted">ยังไม่มีการชำระเงิน</small>
+                } @else {
+                  @for (payment of displayedPayments(); track payment.paymentId) {
+                    <div class="mb-2 pb-2 border-bottom" [class.refund]="payment.paymentType === 'REFUND'">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <i class="bi bi-cash" [class.text-success]="payment.paymentType !== 'REFUND'" [class.text-danger]="payment.paymentType === 'REFUND'"></i>
+                          <small class="ms-1">
+                            <strong>{{ getPaymentTypeLabel(payment.paymentType) }}</strong>
+                          </small>
+                          @if (payment.remark) {
+                            <small class="text-muted d-block ms-4">{{ payment.remark }}</small>
+                          }
+                        </div>
+                        <div class="text-end">
+                          <small [class]="payment.paymentType === 'REFUND' ? 'text-danger fw-bold' : 'text-success fw-bold'">
+                            {{ payment.paymentType === 'REFUND' ? '-' : '+' }}{{ payment.amount }} บาท
+                          </small>
+                          <small class="text-muted d-block">{{ formatDateForDisplay(payment.createdAt) }}</small>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  <hr class="my-2">
+                  <div class="d-flex justify-content-between">
+                    <small><strong>รวมชำระแล้ว:</strong></small>
+                    <small class="text-success fw-bold">{{ totalPaidFromHistory() }} บาท</small>
+                  </div>
+                  @if (booking.deposit < booking.totalPrice) {
+                    <div class="d-flex justify-content-between mt-1">
+                      <small><strong>คงเหลือ:</strong></small>
+                      <small class="text-danger fw-bold">{{ booking.totalPrice - booking.deposit }} บาท</small>
+                    </div>
+                  } @else {
+                    <div class="text-center mt-2">
+                      <i class="bi bi-check-circle text-success"></i>
+                      <small class="text-success fw-bold ms-1">ชำระครบแล้ว</small>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+            
+            <div class="row mb-3 mt-3">
+              <div class="col-6"><strong>สถานะ:</strong></div>
+              <div class="col-6">
+                <span [class]="getStatusBadgeClass(booking.bookingStatus)">
+                  {{ getStatusLabel(booking.bookingStatus) }}
+                </span>
+              </div>
+            </div>
+            @if (booking.remark) {
+              <div class="row mb-3">
+                <div class="col-12"><strong>หมายเหตุ:</strong></div>
+                <div class="col-12">{{ booking.remark }}</div>
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-between w-100">
+              <div>
+                @if (booking.bookingStatus === 'ACTIVE') {
+                  <button type="button" class="btn btn-info me-2" (click)="openAddPaymentModal(booking)">
+                    <i class="bi bi-plus-circle me-1"></i>รับเงินเพิ่ม
+                  </button>
+                  @if (canRefund()) {
+                    <button type="button" class="btn btn-warning me-2" (click)="openRefundModal(booking)">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i>คืนเงินมัดจำ
+                    </button>
+                  }
+                  <button type="button" class="btn btn-primary me-2" (click)="checkOutBooking(booking.bookingId)">
+                    <i class="bi bi-box-arrow-right me-1"></i>Check Out
+                  </button>
+                  <button type="button" class="btn btn-danger" (click)="cancelBooking(booking.bookingId)">
+                    <i class="bi bi-x-circle me-1"></i>ยกเลิกการจอง
+                  </button>
+                }
+              </div>
+              <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    @if (showToast()) {
+      <div class="toast show" 
+           [class.bg-success]="toastType() === 'success'" 
+           [class.bg-danger]="toastType() === 'error'">
+        <div class="toast-body text-white">
+          {{ toastMessage() }}
+        </div>
+      </div>
+    }
+  </div>
+</div>

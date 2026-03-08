@@ -1,0 +1,258 @@
+<div class="room-price-management">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">ราคาห้อง</h1>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span class="icon">+</span>
+      เพิ่มราคา
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <div class="spinner"></div>
+    <p>กำลังโหลดข้อมูล...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-container">
+    <p class="error-message">{{ error() }}</p>
+    <button class="btn btn-secondary" (click)="loadRoomPrices()">ลองอีกครั้ง</button>
+  </div>
+
+  <!-- Room Prices Table -->
+  <div *ngIf="!loading() && !error()" class="table-container">
+    <table class="room-price-table">
+      <thead>
+        <tr>
+          <th>หมายเลขห้อง</th>
+          <th>วันที่</th>
+          <th>ราคา 3 ชั่วโมง</th>
+          <th>ราคารายวัน</th>
+          <th>ราคารายเดือน</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let price of roomPrices()">
+          <td>{{ getRoomNumber(price.roomId) }}</td>
+          <td>{{ formatDate(price.date) }}</td>
+          <td>{{ formatPrice(price.threeHourPrice) }}</td>
+          <td>{{ formatPrice(price.dailyPrice) }}</td>
+          <td>{{ formatPrice(price.monthlyPrice) }}</td>
+          <td class="actions">
+            <button class="btn-icon btn-edit" (click)="openEditModal(price)" title="แก้ไข">
+              <span>✏️</span>
+            </button>
+            <button class="btn-icon btn-delete" (click)="openDeleteModal(price)" title="ลบ">
+              <span>🗑️</span>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="roomPrices().length === 0">
+          <td colspan="6" class="empty-state">
+            ไม่มีข้อมูลราคาห้อง
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Price Modal -->
+  <div *ngIf="showAddModal()" class="modal-backdrop" (click)="closeAddModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>เพิ่มราคาห้อง</h2>
+        <button class="btn-close" (click)="closeAddModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="formErrors().length > 0" class="error-list">
+          <p *ngFor="let error of formErrors()" class="error-item">{{ error }}</p>
+        </div>
+        <form>
+          <div class="form-group">
+            <label for="roomId">ห้อง *</label>
+            <select 
+              id="roomId" 
+              [(ngModel)]="priceForm().roomId" 
+              name="roomId"
+              class="form-control">
+              <option value="">เลือกห้อง</option>
+              <option *ngFor="let room of rooms()" [value]="room.roomId">
+                {{ room.roomNumber }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="date">วันที่ *</label>
+            <input 
+              type="date" 
+              id="date" 
+              [(ngModel)]="priceForm().date" 
+              name="date"
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="threeHourPrice">ราคา 3 ชั่วโมง (฿)</label>
+            <input 
+              type="number" 
+              id="threeHourPrice" 
+              [(ngModel)]="priceForm().threeHourPrice" 
+              name="threeHourPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="dailyPrice">ราคารายวัน (฿)</label>
+            <input 
+              type="number" 
+              id="dailyPrice" 
+              [(ngModel)]="priceForm().dailyPrice" 
+              name="dailyPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="monthlyPrice">ราคารายเดือน (฿)</label>
+            <input 
+              type="number" 
+              id="monthlyPrice" 
+              [(ngModel)]="priceForm().monthlyPrice" 
+              name="monthlyPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddModal()" [disabled]="submitting()">
+          ยกเลิก
+        </button>
+        <button class="btn btn-primary" (click)="submitAddPrice()" [disabled]="submitting()">
+          {{ submitting() ? 'กำลังบันทึก...' : 'บันทึก' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Price Modal -->
+  <div *ngIf="showEditModal()" class="modal-backdrop" (click)="closeEditModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>แก้ไขราคาห้อง</h2>
+        <button class="btn-close" (click)="closeEditModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="formErrors().length > 0" class="error-list">
+          <p *ngFor="let error of formErrors()" class="error-item">{{ error }}</p>
+        </div>
+        <form>
+          <div class="form-group">
+            <label>ห้อง</label>
+            <input 
+              type="text" 
+              [value]="getRoomNumber(priceForm().roomId)" 
+              class="form-control"
+              disabled>
+          </div>
+
+          <div class="form-group">
+            <label>วันที่</label>
+            <input 
+              type="date" 
+              [value]="priceForm().date" 
+              class="form-control"
+              disabled>
+          </div>
+
+          <div class="form-group">
+            <label for="editThreeHourPrice">ราคา 3 ชั่วโมง (฿)</label>
+            <input 
+              type="number" 
+              id="editThreeHourPrice" 
+              [(ngModel)]="priceForm().threeHourPrice" 
+              name="threeHourPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="editDailyPrice">ราคารายวัน (฿)</label>
+            <input 
+              type="number" 
+              id="editDailyPrice" 
+              [(ngModel)]="priceForm().dailyPrice" 
+              name="dailyPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="editMonthlyPrice">ราคารายเดือน (฿)</label>
+            <input 
+              type="number" 
+              id="editMonthlyPrice" 
+              [(ngModel)]="priceForm().monthlyPrice" 
+              name="monthlyPrice"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="0.00">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeEditModal()" [disabled]="submitting()">
+          ยกเลิก
+        </button>
+        <button class="btn btn-primary" (click)="submitEditPrice()" [disabled]="submitting()">
+          {{ submitting() ? 'กำลังบันทึก...' : 'บันทึก' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteModal()" class="modal-backdrop" (click)="closeDeleteModal()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>ยืนยันการลบ</h2>
+        <button class="btn-close" (click)="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>คุณต้องการลบราคาห้องนี้ใช่หรือไม่?</p>
+        <p *ngIf="selectedRoomPrice()" class="delete-info">
+          ห้อง: {{ getRoomNumber(selectedRoomPrice()!.roomId) }}<br>
+          วันที่: {{ formatDate(selectedRoomPrice()!.date) }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeDeleteModal()" [disabled]="submitting()">
+          ยกเลิก
+        </button>
+        <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="submitting()">
+          {{ submitting() ? 'กำลังลบ...' : 'ลบ' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div *ngIf="showToast()" class="toast" [class.toast-success]="toastType() === 'success'" [class.toast-error]="toastType() === 'error'">
+    {{ toastMessage() }}
+  </div>
+</div>

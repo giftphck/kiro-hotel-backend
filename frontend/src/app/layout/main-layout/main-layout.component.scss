@@ -1,0 +1,46 @@
+.layout-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidenav {
+  width: 280px;
+  border-right: none;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #F5F7FA 0%, #E8EAF6 100%);
+}
+
+.content-wrapper {
+  flex: 1;
+  margin-top: 64px;
+  padding: 32px 48px;
+  overflow-y: auto;
+  background-color: #FAFAFA;
+  transition: all 0.3s ease;
+  min-height: calc(100vh - 64px);
+
+  @media (max-width: 1200px) {
+    padding: 24px 32px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 20px 16px 80px 16px; // Extra bottom padding for bottom nav
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
+}
+
+// Ensure proper scrolling
+:host ::ng-deep {
+  .mat-sidenav-content {
+    overflow: visible;
+  }
+}

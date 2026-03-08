@@ -1,0 +1,111 @@
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  padding: 0 24px;
+  transition: left 0.3s ease;
+
+  &.mobile-mode {
+    left: 0;
+  }
+}
+
+.hamburger-menu {
+  display: inline-flex;
+  margin-right: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reports-link {
+  color: #424242;
+  font-weight: 500;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.booking-button {
+  background-color: #64B5F6;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0 24px;
+  box-shadow: 0 2px 4px rgba(100, 181, 246, 0.3);
+  
+  &:hover {
+    background-color: #42A5F5;
+    box-shadow: 0 4px 8px rgba(100, 181, 246, 0.4);
+  }
+}
+
+.icon-button {
+  color: #616161;
+  
+  mat-icon {
+    font-size: 24px;
+  }
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.profile-button {
+  color: #1976D2;
+  
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  &:hover {
+    background-color: rgba(25, 118, 210, 0.08);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .top-bar {
+    left: 0;
+    padding: 0 16px;
+  }
+
+  .reports-link {
+    display: none;
+  }
+
+  .booking-button {
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .top-bar-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-button span {
+    display: none;
+  }
+
+  .booking-button::after {
+    content: 'จอง';
+  }
+}

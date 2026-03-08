@@ -1,0 +1,52 @@
+<mat-toolbar class="top-bar">
+  <!-- Hamburger Menu for Mobile -->
+  <button mat-icon-button class="hamburger-menu" (click)="onMenuToggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Spacer -->
+  <span class="spacer"></span>
+
+  <!-- Right Side Actions -->
+  <div class="top-bar-actions">
+    <!-- Reports Link -->
+    <a mat-button routerLink="/reports" class="reports-link">
+      รายงาน
+    </a>
+
+    <!-- Booking Button -->
+    <button mat-raised-button color="primary" class="booking-button" (click)="onBookingClick()">
+      จองห้องพัก
+    </button>
+
+    <!-- Settings Icon -->
+    <button mat-icon-button (click)="onSettingsClick()" class="icon-button">
+      <mat-icon>settings</mat-icon>
+    </button>
+
+    <!-- Notification Icon with Badge -->
+    <button mat-icon-button (click)="onNotificationClick()" class="icon-button">
+      <mat-icon [matBadge]="notificationCount" matBadgeColor="warn">notifications</mat-icon>
+    </button>
+
+    <!-- User Profile with Dropdown -->
+    <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-button">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #profileMenu="matMenu">
+      <button mat-menu-item (click)="onProfileMenuClick('profile')">
+        <mat-icon>person</mat-icon>
+        <span>โปรไฟล์</span>
+      </button>
+      <button mat-menu-item (click)="onProfileMenuClick('settings')">
+        <mat-icon>settings</mat-icon>
+        <span>ตั้งค่า</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="onProfileMenuClick('logout')">
+        <mat-icon>logout</mat-icon>
+        <span>ออกจากระบบ</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

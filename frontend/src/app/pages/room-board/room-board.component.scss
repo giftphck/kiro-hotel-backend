@@ -1,0 +1,76 @@
+.room-board-table {
+  th, td {
+    vertical-align: middle;
+    min-width: 100px;
+  }
+
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 1;
+  }
+
+  thead th:first-child {
+    z-index: 2;
+  }
+}
+
+.cell-content {
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &.cursor-pointer {
+    cursor: pointer;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  i {
+    font-size: 1.2rem;
+  }
+}
+
+// Status colors
+.bg-success {
+  background-color: #28a745 !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.bg-primary {
+  background-color: #007bff !important;
+}
+
+.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+// Sidebar cards
+.card-header {
+  h6 {
+    font-weight: 600;
+  }
+}
+
+.border-bottom:last-child {
+  border-bottom: none !important;
+}

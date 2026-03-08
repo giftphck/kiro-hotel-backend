@@ -1,0 +1,37 @@
+<aside class="sidebar">
+  <!-- Hotel Logo -->
+  <div class="sidebar-logo">
+    <mat-icon class="logo-icon">hotel</mat-icon>
+    <span class="logo-text">Hotel Management</span>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <mat-nav-list>
+      @for (item of menuItems; track item.route) {
+        <mat-list-item>
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="active-menu-item"
+            class="menu-link"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        </mat-list-item>
+      }
+    </mat-nav-list>
+  </nav>
+
+  <!-- Admin Profile Section -->
+  <div class="sidebar-profile">
+    <div class="profile-info">
+      <mat-icon class="profile-avatar">account_circle</mat-icon>
+      <span class="profile-name">{{ adminName }}</span>
+    </div>
+    <button mat-button class="logout-button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>ออกจากระบบ</span>
+    </button>
+  </div>
+</aside>

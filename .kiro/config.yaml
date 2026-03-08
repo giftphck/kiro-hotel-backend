@@ -1,0 +1,9 @@
+version: 1
+
+spec_workflow:
+  stages:
+    - requirements
+    - clarification
+    - approve
+    - design
+    - tasks

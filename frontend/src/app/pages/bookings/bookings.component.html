@@ -1,0 +1,438 @@
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">จัดการการจอง</h2>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <i class="bi bi-plus-circle me-2"></i>จองห้องใหม่
+    </button>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Search by Room/Customer -->
+        <div class="col-md-3">
+          <label class="form-label">ค้นหา (ห้อง/ลูกค้า)</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="ค้นหาเลขห้องหรือชื่อลูกค้า"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="searchTerm.set($event)"
+          />
+        </div>
+
+        <!-- Filter by Status -->
+        <div class="col-md-2">
+          <label class="form-label">สถานะ</label>
+          <select 
+            class="form-select"
+            [(ngModel)]="filterStatus"
+            (ngModelChange)="filterStatus.set($event)"
+          >
+            <option value="ALL">ทั้งหมด</option>
+            <option value="ACTIVE">ใช้งาน</option>
+            <option value="CHECKED_OUT">เช็คเอาท์แล้ว</option>
+            <option value="CANCELLED">ยกเลิก</option>
+          </select>
+        </div>
+
+        <!-- Filter by Check-in Date -->
+        <div class="col-md-3">
+          <label class="form-label">วันที่เช็คอิน</label>
+          <input 
+            type="date" 
+            class="form-control"
+            [(ngModel)]="filterCheckInDate"
+            (ngModelChange)="filterCheckInDate.set($event)"
+          />
+        </div>
+
+        <!-- Filter by Check-out Date -->
+        <div class="col-md-3">
+          <label class="form-label">วันที่เช็คเอาท์</label>
+          <input 
+            type="date" 
+            class="form-control"
+            [(ngModel)]="filterCheckOutDate"
+            (ngModelChange)="filterCheckOutDate.set($event)"
+          />
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div class="col-md-1 d-flex align-items-end">
+          <button 
+            class="btn btn-outline-secondary w-100" 
+            (click)="clearFilters()"
+            title="ล้างตัวกรอง"
+          >
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="mt-3">
+        <small class="text-muted">
+          แสดง {{ filteredBookings().length }} จาก {{ bookings().length }} รายการ
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error() }}
+      <button type="button" class="btn-close" (click)="error.set(null)"></button>
+    </div>
+  }
+
+  <!-- Loading Spinner -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">กำลังโหลด...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Bookings Table -->
+  @if (!loading()) {
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ห้อง</th>
+                <th>ลูกค้า</th>
+                <th>เช็คอิน</th>
+                <th>เช็คเอาท์</th>
+                <th>ประเภท</th>
+                <th>สถานะ</th>
+                <th class="text-end">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (booking of filteredBookings(); track booking.bookingId) {
+                <tr>
+                  <td><strong>{{ booking.roomNumber }}</strong></td>
+                  <td>{{ booking.customerName }}</td>
+                  <td>{{ formatDate(booking.checkInDate) }}</td>
+                  <td>{{ formatDate(booking.checkOutDate) }}</td>
+                  <td>{{ getBookingTypeLabel(booking.bookingType) }}</td>
+                  <td>
+                    <span [class]="getStatusBadgeClass(booking.bookingStatus)">
+                      {{ getStatusLabel(booking.bookingStatus) }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button 
+                      class="btn btn-sm btn-outline-primary" 
+                      (click)="openDetailsModal(booking)"
+                      title="ดูรายละเอียด">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">
+                    ไม่มีข้อมูลการจอง
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Add Booking Modal -->
+  @if (showAddModal()) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">จองห้องใหม่</h5>
+            <button type="button" class="btn-close" (click)="closeAddModal()" [disabled]="submitting()"></button>
+          </div>
+          <div class="modal-body">
+            @if (formErrors().length > 0) {
+              <div class="alert alert-danger">
+                <ul class="mb-0">
+                  @for (error of formErrors(); track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            
+            <form>
+              <!-- Room Selection -->
+              <div class="mb-3">
+                <label class="form-label">ห้อง <span class="text-danger">*</span></label>
+                <select 
+                  class="form-select"
+                  [(ngModel)]="bookingForm().roomId"
+                  (ngModelChange)="bookingForm.update(f => ({...f, roomId: $event}))"
+                  name="roomId"
+                  [disabled]="submitting()">
+                  <option value="">เลือกห้อง</option>
+                  @for (room of availableRooms(); track room.roomId) {
+                    <option [value]="room.roomId">
+                      {{ room.roomNumber }} - {{ room.roomType }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <!-- Customer Info -->
+              <h6 class="mb-3">ข้อมูลลูกค้า</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                  <input 
+                    type="text" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().customer.name"
+                    (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, name: $event}}))"
+                    name="customerName"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                  <input 
+                    type="tel" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().customer.phoneNumber"
+                    (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, phoneNumber: $event}}))"
+                    name="phoneNumber"
+                    maxlength="10"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">เลขบัตรประชาชน <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [(ngModel)]="bookingForm().customer.thaiIdCard"
+                  (ngModelChange)="bookingForm.update(f => ({...f, customer: {...f.customer, thaiIdCard: $event}}))"
+                  name="thaiIdCard"
+                  maxlength="13"
+                  [disabled]="submitting()">
+              </div>
+
+              <!-- Booking Details -->
+              <h6 class="mb-3">รายละเอียดการจอง</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">ประเภทการจอง <span class="text-danger">*</span></label>
+                  <select 
+                    class="form-select"
+                    [(ngModel)]="bookingForm().bookingType"
+                    (ngModelChange)="bookingForm.update(f => ({...f, bookingType: $event, priceType: $event})); onDateOrPriceChange()"
+                    name="bookingType"
+                    [disabled]="submitting()">
+                    @for (type of bookingTypes; track type) {
+                      <option [value]="type">{{ getBookingTypeLabel(type) }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">จำนวนผู้เข้าพัก <span class="text-danger">*</span></label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().numberOfGuests"
+                    (ngModelChange)="bookingForm.update(f => ({...f, numberOfGuests: +$event}))"
+                    name="numberOfGuests"
+                    min="1"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">วันเช็คอิน <span class="text-danger">*</span></label>
+                  <input 
+                    type="datetime-local" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().checkInDate"
+                    (ngModelChange)="bookingForm.update(f => ({...f, checkInDate: $event})); onDateOrPriceChange()"
+                    name="checkInDate"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">วันเช็คเอาท์ <span class="text-danger">*</span></label>
+                  <input 
+                    type="datetime-local" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().checkOutDate"
+                    (ngModelChange)="bookingForm.update(f => ({...f, checkOutDate: $event})); onDateOrPriceChange()"
+                    name="checkOutDate"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <!-- Pricing -->
+              <h6 class="mb-3">ราคา</h6>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">ราคาต่อหน่วย <span class="text-danger">*</span></label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().unitPrice"
+                    (ngModelChange)="bookingForm.update(f => ({...f, unitPrice: +$event})); onDateOrPriceChange()"
+                    name="unitPrice"
+                    min="0"
+                    [disabled]="submitting()">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">ราคารวม</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [value]="bookingForm().totalPrice"
+                    readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">เงินมัดจำ</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [(ngModel)]="bookingForm().deposit"
+                    (ngModelChange)="bookingForm.update(f => ({...f, deposit: +$event}))"
+                    name="deposit"
+                    min="0"
+                    [disabled]="submitting()">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">หมายเหตุ</label>
+                <textarea 
+                  class="form-control"
+                  [(ngModel)]="bookingForm().remark"
+                  (ngModelChange)="bookingForm.update(f => ({...f, remark: $event}))"
+                  name="remark"
+                  rows="2"
+                  [disabled]="submitting()"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddModal()" [disabled]="submitting()">
+              ยกเลิก
+            </button>
+            <button type="button" class="btn btn-primary" (click)="submitAddBooking()" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              จองห้อง
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Booking Details Modal -->
+  @if (showDetailsModal() && selectedBooking(); as booking) {
+    <div class="modal show" style="display: block" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">รายละเอียดการจอง</h5>
+            <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-6"><strong>ห้อง:</strong></div>
+              <div class="col-6">{{ booking.roomNumber }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ลูกค้า:</strong></div>
+              <div class="col-6">{{ booking.customerName }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เบอร์โทร:</strong></div>
+              <div class="col-6">{{ booking.customerPhone }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เช็คอิน:</strong></div>
+              <div class="col-6">{{ formatDate(booking.checkInDate) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เช็คเอาท์:</strong></div>
+              <div class="col-6">{{ formatDate(booking.checkOutDate) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ประเภท:</strong></div>
+              <div class="col-6">{{ getBookingTypeLabel(booking.bookingType) }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>จำนวนผู้เข้าพัก:</strong></div>
+              <div class="col-6">{{ booking.numberOfGuests }} คน</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>ราคารวม:</strong></div>
+              <div class="col-6">{{ booking.totalPrice }} บาท</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>เงินมัดจำ:</strong></div>
+              <div class="col-6">{{ booking.deposit }} บาท</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6"><strong>สถานะ:</strong></div>
+              <div class="col-6">
+                <span [class]="getStatusBadgeClass(booking.bookingStatus)">
+                  {{ getStatusLabel(booking.bookingStatus) }}
+                </span>
+              </div>
+            </div>
+            @if (booking.remark) {
+              <div class="row mb-3">
+                <div class="col-12"><strong>หมายเหตุ:</strong></div>
+                <div class="col-12">{{ booking.remark }}</div>
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            @if (booking.bookingStatus === 'ACTIVE') {
+              <button type="button" class="btn btn-danger" (click)="cancelBooking(booking.bookingId)">
+                ยกเลิกการจอง
+              </button>
+            }
+            <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">
+              ปิด
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Backdrop -->
+  @if (showAddModal() || showDetailsModal()) {
+    <div class="modal-backdrop fade show"></div>
+  }
+
+  <!-- Toast Notification -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    @if (showToast()) {
+      <div class="toast show" 
+           [class.bg-success]="toastType() === 'success'" 
+           [class.bg-danger]="toastType() === 'error'">
+        <div class="toast-body text-white">
+          {{ toastMessage() }}
+        </div>
+      </div>
+    }
+  </div>
+</div>

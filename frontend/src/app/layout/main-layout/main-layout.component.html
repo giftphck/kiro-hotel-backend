@@ -1,0 +1,29 @@
+<mat-sidenav-container class="layout-container">
+  <!-- Sidebar -->
+  <mat-sidenav
+    #sidenav
+    [mode]="sidenavMode"
+    [opened]="sidenavOpened"
+    class="sidenav"
+  >
+    <app-sidebar (click)="closeSidenavOnMobile()"></app-sidebar>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="main-content">
+    <!-- Top Bar -->
+    <app-top-bar 
+      (menuToggle)="toggleSidenav()"
+      (bookingClick)="onBookingClick()"
+      [class.mobile-mode]="isMobile"
+    ></app-top-bar>
+
+    <!-- Page Content -->
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <app-bottom-nav></app-bottom-nav>
+  </mat-sidenav-content>
+</mat-sidenav-container>
